@@ -1,0 +1,8 @@
+.vscode
+.vscode/*
+bin
+bin/*
+obj
+obj/*
+*.csproj
+input.txt
