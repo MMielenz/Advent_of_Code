@@ -14,7 +14,7 @@ class Program
         for (int i = 0; i < leftSide.Count; i++)
         {
             int distance = leftSide[i] - rightSide[i];
-            distances.Add(distance < 0 ? distance * -1 : distance);
+            distances.Add(Math.Abs(leftSide[i] - rightSide[i]));
         }
 
         return distances.Sum();
@@ -37,13 +37,16 @@ class Program
     private static List<int>[] ReadData(string path)
     {
         List<int>[] sides = [[], []];
-        StreamReader sr = new(path);
-        while (!sr.EndOfStream)
+        using (StreamReader sr = new(path))
         {
-            var data = (sr.ReadLine() ?? "").Replace("   ", ";").Split(";");
-            sides[0].Add(int.Parse(data[0]));
-            sides[1].Add(int.Parse(data[1]));
+            while (!sr.EndOfStream)
+            {
+                var data = (sr.ReadLine() ?? "").Split("   ");
+                sides[0].Add(int.Parse(data[0]));
+                sides[1].Add(int.Parse(data[1]));
+            }
         }
+
         return sides;
     }
 
