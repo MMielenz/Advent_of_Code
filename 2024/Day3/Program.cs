@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Day3;
 
@@ -6,43 +7,59 @@ class Program
 {
     public static int Part1()
     {
-        string line = ReadData("sample.txt");
         int result = 0;
+        string[] lines = ReadData("input.txt");
         string pat = @"mul\([0-9]+,[0-9]+\)";
 
-        MatchCollection matches = Regex.Matches(line, pat);
-        for (int i = 0; i < matches.Count; i++)
+        foreach (string line in lines)
         {
-            var extractedNumbers = matches[i].Value.Replace("mul(", "").Replace(")", "").Split(",");
-            result += int.Parse(extractedNumbers[0]) * int.Parse(extractedNumbers[1]);
+            MatchCollection matches = Regex.Matches(line, pat);
+            for (int i = 0; i < matches.Count; i++)
+            {
+                var extractedNumbers = matches[i].Value.Replace("mul(", "").Replace(")", "").Split(",");
+                result += int.Parse(extractedNumbers[0]) * int.Parse(extractedNumbers[1]);
+            }
         }
 
         return result;
     }
 
-    // public static int Part2()
-    // {
-
-    // }
-
-    private static string ReadData(string path)
+    public static int Part2()
     {
-        string line = "";
-        using (StreamReader sr = new(path))
+        int result = 0;
+        string[] lines = ReadData("input.txt");
+        string pat = @"mul\([0-9]+,[0-9]+\)|don't\(\)|do\(\)";
+        bool enabled = true;
+
+        foreach (string line in lines)
         {
-            while (!sr.EndOfStream)
+            MatchCollection matches = Regex.Matches(line, pat);
+            for (int i = 0; i < matches.Count; i++)
             {
-                var data = sr.ReadLine() ?? "";
-                line = data;
+                if (matches[i].Value.Contains("mul") && enabled)
+                {
+                    var extractedNumbers = matches[i].Value.Replace("mul(", "").Replace(")", "").Split(",");
+                    result += int.Parse(extractedNumbers[0]) * int.Parse(extractedNumbers[1]);
+                }
+                else
+                {
+                    enabled = matches[i].Value == "do()";
+                }
             }
         }
-        return line;
+
+        return result;
+    }
+
+    private static string[] ReadData(string path)
+    {
+        return File.ReadAllLines(path, Encoding.UTF8);
     }
 
     static void Main(string[] args)
     {
         Console.WriteLine("Advent of Code Day 2");
         Console.WriteLine($"Part 1: {Part1()}");
-        // Console.WriteLine($"Part 2: {Part2()}");
+        Console.WriteLine($"Part 2: {Part2()}");
     }
 }
