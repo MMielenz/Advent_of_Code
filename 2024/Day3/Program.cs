@@ -58,7 +58,7 @@ class Program
 
     static void Main(string[] args)
     {
-        Console.WriteLine("Advent of Code Day 2");
+        Console.WriteLine("Advent of Code Day 3");
         Console.WriteLine($"Part 1: {Part1()}");
         Console.WriteLine($"Part 2: {Part2()}");
     }
