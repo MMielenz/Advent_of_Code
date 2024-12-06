@@ -13,7 +13,6 @@ class Program
         List<int> distances = [];
         for (int i = 0; i < leftSide.Count; i++)
         {
-            int distance = leftSide[i] - rightSide[i];
             distances.Add(Math.Abs(leftSide[i] - rightSide[i]));
         }
 

@@ -8,11 +8,36 @@ class Program
         public int Y { get; set; } = y;
         public Direction Dir { get; set; } = Direction.Up;
 
-        public void Move()
+        public Player() : this(0, 0) { }
+
+        public void Move(List<List<char>> field)
         {
-            switch(Dir)
+            field[Y][X] = 'X';
+            switch (Dir)
             {
-                // case Direction.Up:  
+                case Direction.Up:
+                    if (field[Y - 1][X] == '#')
+                    {
+                        Dir = Direction.Right;
+                        break;
+                    }
+                    Y--;
+                    break;
+                case Direction.Right:
+                    if (field[Y][X + 1] == '#')
+                    {
+                        
+                    }
+                    X++;
+                    break;
+                case Direction.Down:
+                    if (field[Y + 1][X] == '#') Dir = Direction.Down;
+                    Y++;
+                    break;
+                case Direction.Left:
+                    if (field[Y][X - 1] == '#') Dir = Direction.Up;
+                    X--;
+                    break;
             }
         }
 
@@ -26,18 +51,30 @@ class Program
     {
         int result = 0;
         List<List<char>> field = File.ReadAllLines("sample.txt").Select(x => x.ToCharArray().ToList()).ToList();
-        Player p;
+        Player p = new();
         for (int i = 0; i < field.Count; i++)
         {
             for (int j = 0; j < field[i].Count; j++)
             {
-                if (field[i][j] == '^') p = new(j, i); break;
+                if (field[i][j] == '^')
+                {
+                    p = new(j, i);
+                    break;
+                }
             }
         }
 
-        
-        
+        try
+        {
+            while (true)
+            {
+                p.Move(field);
+            }
+        }
+        catch { }
 
+
+        result = field.Sum(x => x.Count(x => x == 'X'));
         return result;
     }
 
