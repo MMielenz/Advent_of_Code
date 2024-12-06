@@ -1,11 +1,39 @@
-﻿namespace aoc;
+﻿namespace Tag3;
 
 class Program
 {
+    record Number(int Value, int XCord, int YCord, int LengthOfNumber)
+    {
+        // public int Value { get; set; }
+        // public int XCord { get; set; }
+        // public int YCord { get; set; }
+        // public int LengthOfNumber { get; set; }
+        public List<int> AllXCords => Enumerable.Range(XCord, LengthOfNumber).ToList();
+    }
+
+    class Gear(int xCord, int yCord)
+    {
+        public int XCord { get; set; } = xCord;
+        public int YCord { get; set; } = yCord;
+    }
+
     static void Part1()
     {
         StreamReader sr = new StreamReader("input.txt");
         string line = sr.ReadLine();
+
+
+        // string pat = @"[0-9]+";
+
+        // foreach (string line in lines)
+        // {
+        //     MatchCollection matches = Regex.Matches(line, pat);
+        //     for (int i = 0; i < matches.Count; i++)
+        //     {
+        //         var extractedNumbers = matches[i].Value.Replace("mul(", "").Replace(")", "").Split(",");
+        //         result += int.Parse(extractedNumbers[0]) * int.Parse(extractedNumbers[1]);
+        //     }
+        // }
 
         List<char[]> engine = new List<char[]>();
 
