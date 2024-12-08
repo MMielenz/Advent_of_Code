@@ -2,17 +2,18 @@
 
 class Program
 {
-    class Player(int x, int y)
+    class Guard(int x, int y)
     {
         public int X { get; set; } = x;
         public int Y { get; set; } = y;
         public Direction Dir { get; set; } = Direction.Up;
+        public int InitialX { get; } = x;
+        public int InitialY { get; } = y;
 
-        public Player() : this(0, 0) { }
+        public Guard() : this(0, 0) { }
 
         public void Move(List<List<char>> field)
         {
-            field[Y][X] = 'X';
             switch (Dir)
             {
                 case Direction.Up:
@@ -26,18 +27,31 @@ class Program
                 case Direction.Right:
                     if (field[Y][X + 1] == '#')
                     {
-                        
+                        Dir = Direction.Down;
+                        break;
                     }
                     X++;
                     break;
                 case Direction.Down:
-                    if (field[Y + 1][X] == '#') Dir = Direction.Down;
+                    if (field[Y + 1][X] == '#')
+                    {
+                        Dir = Direction.Left;
+                        break;
+                    }
                     Y++;
                     break;
                 case Direction.Left:
-                    if (field[Y][X - 1] == '#') Dir = Direction.Up;
+                    if (field[Y][X - 1] == '#')
+                    {
+                        Dir = Direction.Up;
+                        break;
+                    }
                     X--;
                     break;
+            }
+            if (X == InitialX && Y == InitialY)
+            {
+                throw new LoopException();
             }
         }
 
@@ -46,33 +60,38 @@ class Program
             Up, Right, Down, Left
         }
     }
+    class LoopException : Exception
+    {
+        public LoopException()
+        {
+        }
+    }
 
     public static int Part1()
     {
         int result = 0;
-        List<List<char>> field = File.ReadAllLines("sample.txt").Select(x => x.ToCharArray().ToList()).ToList();
-        Player p = new();
+        List<List<char>> field = File.ReadAllLines("input.txt").Select(x => x.ToCharArray().ToList()).ToList();
+        Guard g = new();
         for (int i = 0; i < field.Count; i++)
         {
             for (int j = 0; j < field[i].Count; j++)
             {
                 if (field[i][j] == '^')
                 {
-                    p = new(j, i);
+                    g = new(j, i);
                     break;
                 }
             }
         }
-
         try
         {
             while (true)
             {
-                p.Move(field);
+                field[g.Y][g.X] = 'X';
+                g.Move(field);
             }
         }
         catch { }
-
 
         result = field.Sum(x => x.Count(x => x == 'X'));
         return result;
@@ -82,7 +101,52 @@ class Program
     public static int Part2()
     {
         int result = 0;
+        List<List<char>> field = File.ReadAllLines("sample.txt").Select(x => x.ToCharArray().ToList()).ToList();
+        Guard g = new();
+        for (int i = 0; i < field.Count; i++)
+        {
+            for (int j = 0; j < field[i].Count; j++)
+            {
+                if (field[i][j] == '^')
+                {
+                    g = new(j, i);
+                    break;
+                }
+            }
+        }
 
+        List<List<char>> originalField = new List<List<char>>(field);
+        for (int i = 0; i < field.Count; i++)
+        {
+            for (int j = 0; j < field[i].Count; j++)
+            {
+                field[i][j] = '#';
+                if (i == 6 && j == 4)
+                {
+                    Console.WriteLine("");
+                }
+                try
+                {
+                    while (true)
+                    {
+                        g.Move(field);
+                    }
+                }
+                catch (LoopException)
+                {
+                    result++;
+                    field = new List<List<char>>(originalField);
+                }
+                catch
+                {
+                    field = new List<List<char>>(originalField);
+                }
+                // finally
+                // {
+                //     field = new List<List<char>>(originalField);
+                // }
+            }
+        }
         return result;
     }
 
