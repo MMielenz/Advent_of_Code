@@ -7,16 +7,16 @@ class Program
         public int X { get; set; } = x;
         public int Y { get; set; } = y;
         public Direction Dir { get; set; } = Direction.Up;
-        public int InitialX { get; } = x;
-        public int InitialY { get; } = y;
 
         public Guard() : this(0, 0) { }
+        public Guard(Guard g) : this(g.X, g.Y) { }
 
-        public void Move(List<List<char>> field)
+        public bool Move(List<List<char>> field)
         {
             switch (Dir)
             {
                 case Direction.Up:
+                    if (Y - 1 < 0) return false;
                     if (field[Y - 1][X] == '#')
                     {
                         Dir = Direction.Right;
@@ -25,6 +25,7 @@ class Program
                     Y--;
                     break;
                 case Direction.Right:
+                    if (X + 1 == field[X].Count) return false;
                     if (field[Y][X + 1] == '#')
                     {
                         Dir = Direction.Down;
@@ -33,6 +34,7 @@ class Program
                     X++;
                     break;
                 case Direction.Down:
+                    if (Y + 1 == field.Count) return false;
                     if (field[Y + 1][X] == '#')
                     {
                         Dir = Direction.Left;
@@ -41,6 +43,7 @@ class Program
                     Y++;
                     break;
                 case Direction.Left:
+                    if (X - 1 < 0) return false;
                     if (field[Y][X - 1] == '#')
                     {
                         Dir = Direction.Up;
@@ -49,26 +52,46 @@ class Program
                     X--;
                     break;
             }
-            if (X == InitialX && Y == InitialY)
-            {
-                throw new LoopException();
-            }
-        }
-
-        public enum Direction
-        {
-            Up, Right, Down, Left
+            return true;
         }
     }
-    class LoopException : Exception
+    public enum Direction
     {
-        public LoopException()
-        {
-        }
+        Up, Right, Down, Left
     }
+    public record VisitedPlace(int X, int Y, Direction Dir);
 
     public static int Part1()
     {
+        List<List<char>> field = File.ReadAllLines("input.txt").Select(x => x.ToCharArray().ToList()).ToList();
+        Guard g = new();
+        for (int i = 0; i < field.Count; i++)
+        {
+            for (int j = 0; j < field[i].Count; j++)
+            {
+                if (field[i][j] == '^')
+                {
+                    g = new(j, i);
+                    break;
+                }
+            }
+        }
+        do
+        {
+            field[g.Y][g.X] = 'X';
+        }
+        while (g.Move(field));
+
+        return field.Sum(x => x.Count(x => x == 'X'));
+    }
+
+    /// <summary>
+    /// Bad Performance
+    /// </summary>
+    /// <returns></returns>
+    public static int Part2()
+    {
+        DateTime start = DateTime.Now;
         int result = 0;
         List<List<char>> field = File.ReadAllLines("input.txt").Select(x => x.ToCharArray().ToList()).ToList();
         Guard g = new();
@@ -83,70 +106,35 @@ class Program
                 }
             }
         }
-        try
+        Guard originalGuard = new(g);
+        List<VisitedPlace> normalyVisited = [];
+        do
         {
-            while (true)
-            {
-                field[g.Y][g.X] = 'X';
-                g.Move(field);
-            }
-        }
-        catch { }
+            normalyVisited.Add(new(g.X, g.Y, g.Dir));
+        } while (g.Move(field));
+        normalyVisited = normalyVisited.GroupBy(x => new { x.X, x.Y }).Select(x => x.First()).ToList();
+        g = new(originalGuard);
 
-        result = field.Sum(x => x.Count(x => x == 'X'));
-        return result;
-    }
-
-
-    public static int Part2()
-    {
-        int result = 0;
-        List<List<char>> field = File.ReadAllLines("sample.txt").Select(x => x.ToCharArray().ToList()).ToList();
-        Guard g = new();
-        for (int i = 0; i < field.Count; i++)
+        foreach (VisitedPlace v in normalyVisited)
         {
-            for (int j = 0; j < field[i].Count; j++)
+            List<VisitedPlace> visitedPlaces = [];
+            field[v.Y][v.X] = '#';
+            do
             {
-                if (field[i][j] == '^')
-                {
-                    g = new(j, i);
-                    break;
-                }
-            }
-        }
-
-        List<List<char>> originalField = new List<List<char>>(field);
-        for (int i = 0; i < field.Count; i++)
-        {
-            for (int j = 0; j < field[i].Count; j++)
-            {
-                field[i][j] = '#';
-                if (i == 6 && j == 4)
-                {
-                    Console.WriteLine("");
-                }
-                try
-                {
-                    while (true)
-                    {
-                        g.Move(field);
-                    }
-                }
-                catch (LoopException)
+                VisitedPlace newVisitedPlace = new(g.X, g.Y, g.Dir);
+                if (visitedPlaces.Contains(newVisitedPlace))
                 {
                     result++;
-                    field = new List<List<char>>(originalField);
+                    break;
                 }
-                catch
-                {
-                    field = new List<List<char>>(originalField);
-                }
-                // finally
-                // {
-                //     field = new List<List<char>>(originalField);
-                // }
+                visitedPlaces.Add(newVisitedPlace);
             }
+            while (g.Move(field));
+
+            field[v.Y][v.X] = '.';
+            g = new(originalGuard);
         }
+        Console.WriteLine($"Dauer: {(DateTime.Now - start).TotalMinutes}");
         return result;
     }
 
