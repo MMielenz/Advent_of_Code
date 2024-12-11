@@ -19,9 +19,26 @@ class Program
                 sb.Append((isFile ? id.ToString() : '.'));
             }
             isFile = !isFile;
-            id = isFile ? id+1 : id;
+            id = isFile ? id + 1 : id;
         }
-        string decompressLine = sb.ToString();
+        var decompressedLine = sb.ToString().ToList();
+
+        for (int i = decompressedLine.Count - 1; i > 0; i--)
+        {
+            if (decompressedLine[i] == '.') continue;
+            // int indexFree = decompressedLine.Find(x => x == '.');
+            int indexFree = decompressedLine.IndexOf('.');
+            decompressedLine[indexFree] = decompressedLine[i];
+            decompressedLine[i] = '.';  
+        }
+
+        var tes = new string(decompressedLine.ToArray());
+
+        for (int i = 0; i < decompressedLine.Count; i++)
+        {
+            if (decompressedLine[i] == '.') break;
+            result += i * int.Parse(decompressedLine[i].ToString());
+        }
 
         return result;
     }
