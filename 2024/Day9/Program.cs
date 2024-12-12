@@ -1,8 +1,4 @@
-﻿using System.Globalization;
-using System.Text;
-using System.Text.RegularExpressions;
-
-namespace Day9;
+﻿namespace Day9;
 
 class Program
 {
@@ -42,24 +38,6 @@ class Program
         return result;
     }
 
-    public static string ListOfIntsToString(List<int> values)
-    {
-        StringBuilder sb = new();
-        // string s = "";
-        foreach (var v in values)
-        {
-            // s += v;
-            sb.Append(v == -1 ? "." : v);
-        }
-        // return s;
-        return sb.ToString();
-    }
-
-    // public static string debugHelp(List<int> values)
-    // {
-    //     return ListOfIntsToString(values).Replace("-1", ".");
-    // }
-
     public static ulong Part2()
     {
         ulong result = 0;
@@ -78,36 +56,48 @@ class Program
             id = isFile ? id + 1 : id;
         }
 
+
         for (int i = decompressedValues.Count - 1; i >= 0; i--)
         {
             if (decompressedValues[i] == -1) continue;
+            
             int lengthOfFile = 1;
             while (i - lengthOfFile >= 0 && decompressedValues[i - lengthOfFile] == decompressedValues[i])
             {
                 lengthOfFile++;
             }
-            StringBuilder sb = new();
-            for (int j = 0; j < lengthOfFile; j++)
+
+            // find suitable free space
+            bool found = false;
+            int startIndexFreeSpace = 0;
+            for (int j = 0; j < decompressedValues.Count; j++)
             {
-                sb.Append(@"\.");
-            }
-            var test = ListOfIntsToString(decompressedValues);
-            MatchCollection matches = Regex.Matches(ListOfIntsToString(decompressedValues), sb.ToString());
-            if (matches.Count > 0)
-            {
-                if (matches[0].Index > i)
+                if (decompressedValues[j] != -1) continue;
+                if (j > i)
                 {
-                    i -= lengthOfFile - 1;
-
-                    continue;
+                    found = false;
+                    break;
                 }
+                found = true;
+                startIndexFreeSpace = j;
+                for (int k = 0; k < lengthOfFile; k++)
+                {
+                    if (decompressedValues[j + k] != -1)
+                    {
+                        found = false;
+                        break;
+                    }
+                }
+                if (found) break;
+            }
 
+            if (found)
+            {
                 for (int j = 0; j < lengthOfFile; j++)
                 {
-                    decompressedValues[matches[0].Index + j] = decompressedValues[i - j];
+                    decompressedValues[startIndexFreeSpace + j] = decompressedValues[i - j];
                     decompressedValues[i - j] = -1;
                 }
-
             }
             i -= lengthOfFile - 1;
         }
@@ -125,7 +115,9 @@ class Program
     {
         Console.WriteLine("Advent of Code Day 9");
         Console.WriteLine($"Part 1: {Part1()}");
+        DateTime start = DateTime.Now;
         Console.WriteLine($"Part 2: {Part2()}");
+        Console.WriteLine($"Execution time: {DateTime.Now - start}");
         Console.ReadKey();
     }
 }
