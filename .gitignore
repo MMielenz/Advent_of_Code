@@ -1,5 +1,7 @@
 .vscode
 .vscode/*
+.idea
+.idea/*
 bin
 bin/*
 obj
