@@ -1,0 +1,3 @@
+module github.com/MMielenz/aoc
+
+go 1.25.3
