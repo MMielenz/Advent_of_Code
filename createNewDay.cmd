@@ -30,17 +30,20 @@ if not exist %year% (
 )
 cd %year%
 
-if  exist "Day%day%" (
-    goto :projectExists
+if  not exist "Day%day%" (
+    mkdir "Day%day%" 2> nul
 )
 
-mkdir "Day%day%" 2> nul
 cd "Day%day%"
 
 
 :: Create the txt-files for the data
-echo. 2> sample.txt
-echo. 2> input.txt
+if not exist sample.txt (
+    echo. 2> sample.txt
+)
+if not exist input.txt (
+    echo. 2> input.txt
+)
 
 if "%languageId%"=="0" (
     goto :javascript
@@ -58,6 +61,9 @@ if "%languageId%"=="0" (
 :: JavaScript
 :::::::::::::::::::::::::::::::::::::::::::::::
 :javascript
+if exist part1.js (
+    goto :projectExists
+)
 more "%basePath%/templates/javascript_template/index.js" > part1.js
 more "%basePath%/templates/javascript_template/index.js" > part2.js
 goto :openProject
@@ -66,6 +72,9 @@ goto :openProject
 :: go
 :::::::::::::::::::::::::::::::::::::::::::::::
 :go
+if exist main.go (
+    goto :projectExists
+)
 more "%basePath%/templates/go_template/main.go" > main.go
 goto :openProject
 
@@ -74,6 +83,9 @@ goto :openProject
 :: C#
 :::::::::::::::::::::::::::::::::::::::::::::::
 :csharp
+if exist Program.cs (
+    goto :projectExists
+)
 :: Create new Project
 dotnet new console --use-program-main
 :: copy the default code
