@@ -8,3 +8,4 @@ obj
 obj/*
 *.sln
 input.txt
+*.exe
