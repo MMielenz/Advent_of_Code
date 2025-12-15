@@ -69,6 +69,7 @@ for (let i = 0; i < tiles.length; i++) {
     }
 }
 
+console.log("eingelesen")
 
 // // // fill the rest
 // const startY = validTiles.sort((a, b) => a.y - b.y)[0].y + 1;
@@ -108,11 +109,24 @@ for (let i = 0; i < tiles.length; i++) {
 
 
 
-
+const cacheValidFields = new Map();
+const makekey = (x, y) => `${x}-${y}`;
 
 const isInField = ({ x, y }) => {
     // return true;
-    const row = getRow(y);
+    const key = makekey(x, y);
+    let result = cacheValidFields.get(key);
+    if (result === undefined) {
+        const row = getRow(y);
+        if (row.find(p => p.x === x)) {
+            cacheValidFields.set(key, true);
+            return true;
+        }
+        const bordersCrossed = row.filter(p => p.x >= x).length;
+        result = bordersCrossed % 2 === 1
+        cacheValidFields.set(key, result);
+    }
+    return result;
 
     if (row.find(r => r.x === x)) {
         return true;
@@ -152,34 +166,34 @@ const isInField = ({ x, y }) => {
 }
 
 const isSideValid = (point1, point2) => {
-    const horizontal = point1.y === point2.y
-    if (point1.x === point2.x && point1.y === point2.y) {
-        return true;
-    }
+    // const horizontal = point1.y === point2.y
+    // if (point1.x === point2.x && point1.y === point2.y) {
+    //     return true;
+    // }
 
-    if (horizontal) {
-        let left;
-        let right;
-        if (point1.x < point2.x) {
-            left = point1.x
-            right = point2.x;
-        } else {
-            left = point2.x
-            right = point1.x;
-        }
-        return horizontalLines.findIndex(l => l[0] === point1.y && l[1] <= left && l[2] >= right) !== -1
-    } else {
-        let top;
-        let bottom;
-        if (point1.y < point2.y) {
-            top = point1.y;
-            bottom = point2.y;
-        } else {
-            top = point2.y;
-            bottom = point1.y;
-        }
-        return verticalLines.findIndex(l => l[0] === point1.x && l[1] <= top && l[2] >= bottom) !== -1
-    }
+    // if (horizontal) {
+    //     let left;
+    //     let right;
+    //     if (point1.x < point2.x) {
+    //         left = point1.x
+    //         right = point2.x;
+    //     } else {
+    //         left = point2.x
+    //         right = point1.x;
+    //     }
+    //     return horizontalLines.findIndex(l => l[0] === point1.y && l[1] <= left && l[2] >= right) !== -1
+    // } else {
+    //     let top;
+    //     let bottom;
+    //     if (point1.y < point2.y) {
+    //         top = point1.y;
+    //         bottom = point2.y;
+    //     } else {
+    //         top = point2.y;
+    //         bottom = point1.y;
+    //     }
+    //     return verticalLines.findIndex(l => l[0] === point1.x && l[1] <= top && l[2] >= bottom) !== -1
+    // }
 
 
 
@@ -248,7 +262,7 @@ for (let i = 0; i < tiles.length; i++) {
         if (isSideValid(tiles[i], otherCorner1) && isSideValid(tiles[i], otherCorner2)
             && isSideValid(tiles[j], otherCorner1) && isSideValid(tiles[j], otherCorner2)) {
             rectangles.push(new Rectangle(tiles[i].x, tiles[i].y, tiles[j].x, tiles[j].y));
-            // console.log("valid rectangle");
+            console.log("valid rectangle");
         }
     }
 }
