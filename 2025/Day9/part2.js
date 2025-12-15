@@ -5,6 +5,37 @@ let result = 0;
 
 const data = (await fs.readFile("./input.txt", { encoding: "utf-8" })).split("\r\n");
 
+class Cache {
+    maxSize = 1_000_000
+    constructor() {
+        this.maps = [new Map()];
+    }
+
+
+
+    getValue(key) {
+        let value = undefined;
+        for (let i = 0; i < this.maps.length; i++) {
+            value = this.maps[i].get(key);
+            if (value !== undefined) {
+                return value;
+            }
+        }
+        return value;
+
+
+    }
+
+    setValue(key, value) {
+        const map = this.maps[this.maps.length - 1];
+        map.set(key, value);
+        if (map.size > this.maxSize) {
+            this.maps.push(new Map())
+            console.log("New Map")
+        }
+    }
+}
+
 class Rectangle {
     constructor(x1, y1, x2, y2) {
         this.x1 = x1;
@@ -15,10 +46,59 @@ class Rectangle {
     }
 }
 
+const tiles = [];
+data.forEach(line => {
+    const values = line.split(",");
+    tiles.push({ x: parseInt(values[0]), y: parseInt(values[1]) });
+})
+
+const cache = new Cache();
+
+
+// const makeKey(x, y) {
+//     return `${x}-${y}`
+// }
+
+for (const { x, y } of tiles) {
+    if (cache.getValue(y) === undefined) cache.setValue(y, []);
+    cache.getValue(y).push(x);
+}
+
+// const row = getRow(y);
+// if (row.find(p => p.x === x)) {
+//     value = true;
+// } else {
+//     const bordersCrossed = row.filter(p => p.x >= x).length;
+//     value = bordersCrossed % 2 === 1
+// }
+
+// return value;
+
+// const validTiles = [...tiles];
+// // compute the outline
+// for (let i = 0; i < tiles.length; i++) {
+//     const redTile = tiles[i];
+//     const xNeighbour = tiles.find(t => t.x > redTile.x && t.y === redTile.y);
+//     const yNeighbour = tiles.find(t => t.y > redTile.y && t.x === redTile.x);
+
+
+//     if (xNeighbour) {
+//         // horizontalLines.push([redTile.y, redTile.x, xNeighbour.x])
+//         for (let x = redTile.x + 1; x < xNeighbour.x; x++) {
+//             validTiles.push({ x, y: redTile.y });
+//         }
+//     }
+
+//     if (yNeighbour) {
+//         // verticalLines.push([redTile.x, redTile.y, yNeighbour.y])
+//         for (let y = redTile.y + 1; y < yNeighbour.y; y++) {
+//             validTiles.push({ x: redTile.x, y });
+//         }
+//     }
+// }
 
 const cacheRows = new Map();
-const cacheColoums = new Map();
-const getRow = (y) => {
+function getRow(y) {
     let row = cacheRows.get(y)
     if (!row) {
         row = validTiles.filter(t => t.y === y).sort((a, b) => a.x - b.x);
@@ -26,189 +106,21 @@ const getRow = (y) => {
     }
     return row;
 }
-const getColoumn = (x) => {
-    let coloumn = cacheColoums.get(x)
-    if (!coloumn) {
-        coloumn = validTiles.filter(t => t.x === x).sort((a, b) => a.y - b.y);
-        cacheColoums.set(x, coloumn);
-    }
-    return coloumn;
-}
-
-
-const tiles = [];
-data.forEach(line => {
-    const values = line.split(",");
-    tiles.push({ x: parseInt(values[0]), y: parseInt(values[1]) });
-})
-
-
-const horizontalLines = [];
-const verticalLines = [];
-
-const validTiles = [...tiles];
-// compute the outline
-for (let i = 0; i < tiles.length; i++) {
-    const redTile = tiles[i];
-    const xNeighbour = tiles.find(t => t.x > redTile.x && t.y === redTile.y);
-    const yNeighbour = tiles.find(t => t.y > redTile.y && t.x === redTile.x);
-
-
-    if (xNeighbour) {
-        horizontalLines.push([redTile.y, redTile.x, xNeighbour.x])
-        for (let x = redTile.x + 1; x < xNeighbour.x; x++) {
-            validTiles.push({ x, y: redTile.y });
-        }
-    }
-
-    if (yNeighbour) {
-        verticalLines.push([redTile.x, redTile.y, yNeighbour.y])
-        for (let y = redTile.y + 1; y < yNeighbour.y; y++) {
-            validTiles.push({ x: redTile.x, y });
-        }
-    }
-}
-
-console.log("eingelesen")
-
-// // // fill the rest
-// const startY = validTiles.sort((a, b) => a.y - b.y)[0].y + 1;
-// const endY = validTiles.sort((a, b) => b.y - a.y)[0].y;
-
-
-// const filledTiles = [];
-// console.log("tets")
-// for (let y = startY; y < endY; y++) {
-//     const row = getRow(y);
-//     let x = row[0].x + 1;
-//     while (x < row[row.length - 1].x) {
-//         if (!row.find(r => r.x === x)) {
-//             filledTiles.push({ x, y });
-//         }
-//         x++;
-//     }
-// }
-// console.log("akjasf")
 
 
 
-// const stuff = []
-// for (let i = 0; i < 9; i++) {
-//     stuff.push([]);
-//     for (let j = 0; j < 14; j++) {
-//         stuff[i].push('.')
-//     }
-// }
-// validTiles.forEach(t => stuff[t.y][t.x] = 'X');
-// stuff.forEach(s => {
-//     let string = "";
-//     s.forEach(s => string += s);
-//     console.log(string);
-// })
-
-
-
-
-const cacheValidFields = new Map();
-const makekey = (x, y) => `${x}-${y}`;
-
-const isInField = ({ x, y }) => {
-    // return true;
-    const key = makekey(x, y);
-    let result = cacheValidFields.get(key);
-    if (result === undefined) {
-        const row = getRow(y);
-        if (row.find(p => p.x === x)) {
-            cacheValidFields.set(key, true);
-            return true;
-        }
-        const bordersCrossed = row.filter(p => p.x >= x).length;
-        result = bordersCrossed % 2 === 1
-        cacheValidFields.set(key, result);
-    }
-    return result;
-
-    if (row.find(r => r.x === x)) {
-        return true;
-    }
-    return false;
-
-    if (x == 9 && y == 5) {
-        console.log
-    }
-
-
-    // return true;
-    // return x >= row[0] && x <= row[row.length - 1] && y >= coloumn[0] && y <= coloumn[coloumn.length - 1]
-
-    let isInRow = false;
-    for (let i = 1; i < row.length; i++) {
-        if (x <= row[i].x && x >= row[i - 1].x) {
-            isInRow = true;
-            break;
-        }
-    }
-
-    if (!isInRow) return false;
-    const coloumn = getColoumn(x);
-
-    let isInColoumn = false;
-    for (let i = 1; i < coloumn.length; i++) {
-        if (y <= coloumn[i].y && y >= coloumn[i - 1].y) {
-            isInColoumn = true;
-            break;
-        }
-    }
-
-    if (!isInColoumn) return false;
-
-    return true;
-}
-
+const megaCache = new Cache();
 const isSideValid = (point1, point2) => {
-    // const horizontal = point1.y === point2.y
-    // if (point1.x === point2.x && point1.y === point2.y) {
-    //     return true;
-    // }
-
-    // if (horizontal) {
-    //     let left;
-    //     let right;
-    //     if (point1.x < point2.x) {
-    //         left = point1.x
-    //         right = point2.x;
-    //     } else {
-    //         left = point2.x
-    //         right = point1.x;
-    //     }
-    //     return horizontalLines.findIndex(l => l[0] === point1.y && l[1] <= left && l[2] >= right) !== -1
-    // } else {
-    //     let top;
-    //     let bottom;
-    //     if (point1.y < point2.y) {
-    //         top = point1.y;
-    //         bottom = point2.y;
-    //     } else {
-    //         top = point2.y;
-    //         bottom = point1.y;
-    //     }
-    //     return verticalLines.findIndex(l => l[0] === point1.x && l[1] <= top && l[2] >= bottom) !== -1
-    // }
-
-
-
-
-
     const sameHeight = point1.y === point2.y ? true : false;
     const distance = sameHeight ? point1.x - point2.x : point1.y - point2.y;
     const abs = Math.abs(distance) + 1;
     for (let i = 0; i < abs; i++) {
         if (sameHeight) {
-            if (!isInField({ x: distance < 0 ? point1.x + i : point1.x - i, y: point1.y })) {
+            if (!megaCache.isFieldValid({ x: distance < 0 ? point1.x + i : point1.x - i, y: point1.y })) {
                 return false;
             }
         } else {
-            if (!isInField({ x: point1.x, y: distance < 0 ? point1.y + i : point1.y - i })) {
+            if (!megaCache.isFieldValid({ x: point1.x, y: distance < 0 ? point1.y + i : point1.y - i })) {
                 return false;
             }
         }
@@ -217,61 +129,34 @@ const isSideValid = (point1, point2) => {
 }
 
 
-const rectangles = [];
+let distances = [];
 for (let i = 0; i < tiles.length; i++) {
-    for (let j = 0; j < tiles.length; j++) {
+    for (let j = i + 1; j < tiles.length; j++) {
         if (i === j) continue;
-
-        // let vektor = { x: tiles[i].x - tiles[j].x, y: tiles[i].y - tiles[j].y };
-        // for (let x = 0; x < Math.abs(vektor.x); x++) {
-        //     if (!isInField({ x: tiles[i].x + x, y: tiles[i].y })) {
-        //         continue;
-        //    }
-        // }
-        // for (let y = 0; y < Math.abs(vektor.y); y++) {
-        //     if (!isInField({ x: tiles[i].x + x, y: tiles[i].y })) {
-        //         continue;
-        //     }
-        // }
-        // for (let x = 0; x < Math.abs(vektor.x); x++) {
-        //     if (!isInField({ x: tiles[j].x + x, y: tiles[j].y })) {
-        //         continue;
-        //     }
-        // }
-        // for (let y = 0; y < Math.abs(vektor.y); y++) {
-        //     if (!isInField({ x: tiles[i].x + x, y: tiles[i].y })) {
-        //         continue;
-        //     }
-        // }
-
-        // if (tiles[i].y > tiles[j].y) {
-
-        // }
-
-        // for (let x = 0; x < Math.abs(tiles[i].x - tiles[j].x); x++) {
-
-        // }
-
-        if (tiles[i].x === 9 && tiles[i].y === 5 && tiles[j].x === 2 && tiles[j].y === 3) {
-            console.log()
-        }
-
-        const otherCorner1 = { x: tiles[i].x, y: tiles[j].y }
-        const otherCorner2 = { x: tiles[j].x, y: tiles[i].y }
-
-        if (isSideValid(tiles[i], otherCorner1) && isSideValid(tiles[i], otherCorner2)
-            && isSideValid(tiles[j], otherCorner1) && isSideValid(tiles[j], otherCorner2)) {
-            rectangles.push(new Rectangle(tiles[i].x, tiles[i].y, tiles[j].x, tiles[j].y));
-            console.log("valid rectangle");
-        }
+        distances.push({ p1: tiles[i], p2: tiles[j], d: Math.abs(tiles[i].x - tiles[j].x) + Math.abs(tiles[i].y - tiles[j].y) })
     }
 }
+distances.sort((a, b) => b.d - a.d);
+// distances = distances.filter((_, index) => index % 2 === 0)
+for (let i = 0; i < distances.length; i++) {
+    const { p1, p2 } = distances[i];
+    const otherCorner1 = { x: p1.x, y: p2.y }
+    const otherCorner2 = { x: p2.x, y: p1.y }
 
-rectangles.sort((a, b) => b.area - a.area);
-result = rectangles[0].area;
+    if (isSideValid(p1, otherCorner1) && isSideValid(p1, otherCorner2)
+        && isSideValid(p2, otherCorner1) && isSideValid(p2, otherCorner2)) {
+        const rect = new Rectangle(p1.x, p1.y, p2.x, p2.y);
+        result = rect.area;
+        break;
+    }
+}
 
 
 console.log(result);
 // 4620654558 too high
+// 214512750  too low
+// 214108934  too low
+
+
 const endTime = performance.now();
 console.log(`The script took ${(endTime - startTime).toFixed(2)} milliseconds`);
