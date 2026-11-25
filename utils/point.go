@@ -8,7 +8,7 @@ func (p Point) Add(other Point) Point {
 	return Point{X: p.X + other.X, Y: p.Y + other.Y}
 }
 
-func (p Point) Manhattan(other Point) int {
+func (p Point) ManhattanDistance(other Point) int {
 	return Abs(p.X-other.X) + Abs(p.Y-other.Y)
 }
 

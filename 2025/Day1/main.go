@@ -14,7 +14,7 @@ func part1() int {
 
 	for _, line := range lines {
 		dir := line[0:1]
-		value := utils.ParseInt(line[1 : len(line)-1])
+		value := utils.ParseInt(line[1:])
 		value = value % 100
 		if dir == "L" {
 			newValue := dial - value
@@ -41,7 +41,39 @@ func part1() int {
 
 func part2() int {
 	result := 0
-	utils.ReadLines("sample.txt")
+	lines := utils.ReadLines("input.txt")
+	dial := 50
+
+	for _, line := range lines {
+		dir := line[0:1]
+		value := utils.ParseInt(line[1:])
+		additionalRotations := value / 100
+		result += additionalRotations
+		value = value % 100
+		if dir == "L" {
+			newValue := dial - value
+			if newValue == 0 {
+				result++
+				dial = newValue
+			} else if newValue < 0 {
+				// if its already 0, dont count again
+				if dial != 0 {
+					result++
+				}
+				dial = newValue + 100
+			} else {
+				dial = newValue
+			}
+		} else {
+			newValue := dial + value
+			if newValue > 99 {
+				result++
+				dial = newValue - 100
+			} else {
+				dial = newValue
+			}
+		}
+	}
 
 	return result
 }
